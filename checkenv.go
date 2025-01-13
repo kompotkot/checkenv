@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-const CHECKENV_VERSION = "v0.0.4"
+const CHECKENV_VERSION = "v0.0.5"
 
 type showSpec struct {
 	loadFrom      map[string]interface{}
@@ -79,6 +79,7 @@ func main() {
 	showQuotes := showFlags.Bool("quotes", false, "Use this flag to put value in quotes")
 	showRaw := showFlags.Bool("raw", false, "Use this flag to prevent comments output")
 	showValue := showFlags.Bool("value", false, "Print value only")
+	showName := showFlags.Bool("name", false, "Print name only")
 
 	versionCommand := "version"
 
@@ -108,12 +109,18 @@ func main() {
 			fmt.Fprintf(os.Stderr, "Usage: %s %s [<provider_name>[+<provider_args>] ...] [<provider_name>[+<provider_args>]://<var_name_1>,<var_name_2>,...,<var_name_n> ...]\nShows the environment variables defined by the given providers.\n", os.Args[0], os.Args[1])
 			os.Exit(2)
 		}
+
+		if *showName && *showValue {
+			fmt.Fprintf(os.Stderr, "You can't use both -name and -value flags at the same time.\n")
+			os.Exit(1)
+		}
+
 		spec := parseShowSpec(showFlags.Args())
 		providedVars := make(map[string]map[string]string)
 		for providerSpec := range spec.loadFrom {
 			vars, providerErr := VariablesFromProviderSpec(providerSpec)
 			if providerErr != nil {
-				log.Fatalf(providerErr.Error())
+				log.Fatal(providerErr.Error())
 			}
 			providedVars[providerSpec] = vars
 		}
@@ -128,10 +135,12 @@ func main() {
 				fmt.Printf("# Generated with %s - all variables:\n", providerSpec)
 			}
 			for k, v := range providedVars[providerSpec] {
-				if !*showValue {
+				if !*showValue && !*showName {
 					fmt.Printf("%s%s=%s\n", exportPrefix, k, AddValueQuotes(v, *showQuotes))
-				} else {
+				} else if *showValue {
 					fmt.Printf("%s\n", AddValueQuotes(v, *showQuotes))
+				} else if *showName {
+					fmt.Printf("%s\n", k)
 				}
 			}
 		}
