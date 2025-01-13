@@ -65,7 +65,7 @@ func AddValueQuotes(val string, showQuotes bool) string {
 	return val
 }
 
-// Cut off the path and return only the value after the '/'.
+// Cut off the path and return only the key after the '/'.
 func RemoveKeyPath(key string, removePath bool) string {
 	if removePath {
 		valSlice := strings.Split(key, "/")
@@ -87,7 +87,7 @@ func main() {
 	showFlags.BoolVar(showHelp, "help", false, "Use this flag if you want help with this command")
 	showExport := showFlags.Bool("export", false, "Use this flag to prepend and \"export \" before every environment variable definition")
 	showQuotes := showFlags.Bool("quotes", false, "Use this flag to put value in quotes")
-	showRemovePath := showFlags.Bool("remove-path", false, "Use this flag to cut off the path and return only the value after the '/'")
+	showRemovePath := showFlags.Bool("remove-path", false, "Use this flag to cut off the path and return only the key after the '/'")
 	showRaw := showFlags.Bool("raw", false, "Use this flag to prevent comments output")
 	showValue := showFlags.Bool("value", false, "Print value only")
 	showName := showFlags.Bool("name", false, "Print name only")
